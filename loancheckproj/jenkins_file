@@ -1,0 +1,80 @@
+pipeline{
+    
+    agent any
+    
+    //we can declare global varibles using {$environment}
+    
+    environment {
+        //when ever u r declaring value in environment varible in double quotes
+         VERSION="1.0.0"
+     }
+     
+     tools{
+        jdk "MytrainingJava"
+        maven "mytraningmaven"
+     }
+     
+     parameters {
+         string(name : 'DEPLOY_DEV',  defaultValue : 'staging', description : '')
+     }
+     
+    
+    stages{
+        
+        stage("check out"){
+            steps{
+               git branch: 'main', credentialsId: 'git_demo_id', url: 'https://github.com/gopikrish95/traningproj.git' 
+            }
+        }
+        // mention the steps of every stage 
+        //this is build stage
+        stage("build"){
+            //steps 
+            //details operation what we are performing
+            steps{
+                //calling the global varible
+               //echo "build stage ${params.DEPLOY_DEV}"
+               bat "mvn clean package -f ${env.WORKSPACE}/loancheckproj/pom.xml"
+            }
+            // end of the step 
+        }
+        //build stage end
+        
+        stage("executing the jar file"){
+            //steps 
+            //details operation what we are performing
+            steps{
+                //calling the global varible
+               echo "running the jar file from work space"
+               bat "java -jar ${env.WORKSPACE}/loancheckproj/target/LoanCheckApp.jar"
+            }
+            // end of the step 
+        }
+        
+    }
+    
+    //we can perform post build action  here
+    post{
+        
+        //will mention 
+        always{
+            
+                echo 'always'
+        
+        }
+        
+        success{
+            
+                echo 'success'
+            
+        }
+        
+        failure{
+            
+                echo 'failure'
+            
+        }
+    }
+    
+    
+}
